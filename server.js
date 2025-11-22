@@ -245,6 +245,25 @@ app.get('/api/categories', (req, res) => {
     });
 });
 
+app.get('/', (req, res) => {
+    res.json({
+        service: 'Electronics Store API',
+        version: '1.0.0',
+        status: 'running',
+        endpoints: {
+            'GET /health': 'Проверка работоспособности',
+            'GET /api/products': 'Получить все товары',
+            'GET /api/products/:id': 'Получить товар по ID',
+            'GET /api/products?category=...': 'Получить товары по категории',
+            'GET /api/categories': 'Получить все категории',
+            'GET /api/orders': 'Получить все заказы',
+            'GET /api/orders/:id': 'Получить заказ по ID',
+            'POST /api/products': 'Добавить товар',
+            'POST /api/orders': 'Создать заказ'
+        }
+    });
+});
+
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'electronics-store-api' });
 });
