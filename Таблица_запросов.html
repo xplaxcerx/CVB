@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Таблица запросов для тестирования API</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .base-url {
+            background-color: #e3f2fd;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+            font-weight: bold;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        tr:hover {
+            background-color: #f5f5f5;
+        }
+        .method {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .method-get {
+            background-color: #61affe;
+            color: white;
+        }
+        .method-post {
+            background-color: #49cc90;
+            color: white;
+        }
+        .url {
+            font-family: 'Courier New', monospace;
+            background-color: #f4f4f4;
+            padding: 4px 8px;
+            border-radius: 3px;
+            word-break: break-all;
+        }
+        .json {
+            font-family: 'Courier New', monospace;
+            background-color: #f4f4f4;
+            padding: 8px;
+            border-radius: 3px;
+            white-space: pre-wrap;
+            font-size: 12px;
+            max-width: 400px;
+            overflow-x: auto;
+        }
+        .params {
+            font-family: 'Courier New', monospace;
+            background-color: #fff3cd;
+            padding: 4px 8px;
+            border-radius: 3px;
+        }
+        .expected-code {
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 3px;
+            display: inline-block;
+        }
+        .code-200 {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .code-201 {
+            background-color: #2196F3;
+            color: white;
+        }
+        .code-400 {
+            background-color: #ff9800;
+            color: white;
+        }
+        .code-404 {
+            background-color: #f44336;
+            color: white;
+        }
+        .note {
+            background-color: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Таблица запросов для тестирования API</h1>
+        
+        <div class="base-url">
+            Базовый URL: <span style="color: #1976d2;">https://cvb-363x.onrender.com</span>
+        </div>
+
+        <table>
+            <thead>
+                <tr>
+                    <th>№</th>
+                    <th>Название теста</th>
+                    <th>Метод</th>
+                    <th>URL / Эндпоинт</th>
+                    <th>Параметры</th>
+                    <th>Body (JSON)</th>
+                    <th>Ожидаемый код</th>
+                    <th>Ожидаемый результат</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>1</td>
+                    <td>Проверка работоспособности</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/health</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>{"status": "ok", "service": "electronics-store-api"}</td>
+                </tr>
+                <tr>
+                    <td>2</td>
+                    <td>Получить все товары</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/products</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>Массив товаров</td>
+                </tr>
+                <tr>
+                    <td>3</td>
+                    <td>Получить товары по категории</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/products</td>
+                    <td class="params">category=Смартфоны</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>Массив товаров категории "Смартфоны"</td>
+                </tr>
+                <tr>
+                    <td>4</td>
+                    <td>Получить товар по ID (существующий)</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/products/1</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>Объект товара с id=1</td>
+                </tr>
+                <tr>
+                    <td>5</td>
+                    <td>Получить товар по ID (несуществующий)</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/products/999</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-404">404</span></td>
+                    <td>{"error": "Товар не найден"}</td>
+                </tr>
+                <tr>
+                    <td>6</td>
+                    <td>Получить все категории</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/categories</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>Массив строк категорий</td>
+                </tr>
+                <tr>
+                    <td>7</td>
+                    <td>Добавить товар (корректный)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/products</td>
+                    <td>-</td>
+                    <td class="json">{
+  "name": "Клавиатура Logitech",
+  "description": "Механическая клавиатура",
+  "price": 3500,
+  "category": "Аксессуары",
+  "inStock": 20
+}</td>
+                    <td><span class="expected-code code-201">201</span></td>
+                    <td>{"success": true, "productId": X, "message": "Товар успешно добавлен"}</td>
+                </tr>
+                <tr>
+                    <td>8</td>
+                    <td>Добавить товар (без обязательных полей)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/products</td>
+                    <td>-</td>
+                    <td class="json">{
+  "description": "Товар без названия"
+}</td>
+                    <td><span class="expected-code code-400">400</span></td>
+                    <td>{"error": "Необходимо указать название и цену товара"}</td>
+                </tr>
+                <tr>
+                    <td>9</td>
+                    <td>Добавить товар (без цены)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/products</td>
+                    <td>-</td>
+                    <td class="json">{
+  "name": "Товар без цены"
+}</td>
+                    <td><span class="expected-code code-400">400</span></td>
+                    <td>{"error": "Необходимо указать название и цену товара"}</td>
+                </tr>
+                <tr>
+                    <td>10</td>
+                    <td>Получить все заказы</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>Массив заказов</td>
+                </tr>
+                <tr>
+                    <td>11</td>
+                    <td>Получить заказ по ID (существующий)</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/orders/1</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-200">200</span></td>
+                    <td>Объект заказа с массивом items</td>
+                </tr>
+                <tr>
+                    <td>12</td>
+                    <td>Получить заказ по ID (несуществующий)</td>
+                    <td><span class="method method-get">GET</span></td>
+                    <td class="url">/api/orders/999</td>
+                    <td>-</td>
+                    <td>-</td>
+                    <td><span class="expected-code code-404">404</span></td>
+                    <td>{"error": "Заказ не найден"}</td>
+                </tr>
+                <tr>
+                    <td>13</td>
+                    <td>Создать заказ (корректный)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td class="json">{
+  "clientName": "Иван Иванов",
+  "clientEmail": "ivan@example.com",
+  "clientPhone": "+79001234567",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 2
+    }
+  ]
+}</td>
+                    <td><span class="expected-code code-201">201</span></td>
+                    <td>{"success": true, "orderId": X, "totalAmount": Y, "message": "Заказ успешно создан"}</td>
+                </tr>
+                <tr>
+                    <td>14</td>
+                    <td>Создать заказ (без обязательных полей)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td class="json">{
+  "clientEmail": "test@example.com"
+}</td>
+                    <td><span class="expected-code code-400">400</span></td>
+                    <td>{"error": "Необходимо указать имя, email и товары"}</td>
+                </tr>
+                <tr>
+                    <td>15</td>
+                    <td>Создать заказ (пустой массив товаров)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td class="json">{
+  "clientName": "Иван Иванов",
+  "clientEmail": "ivan@example.com",
+  "items": []
+}</td>
+                    <td><span class="expected-code code-400">400</span></td>
+                    <td>{"error": "Необходимо указать имя, email и товары"}</td>
+                </tr>
+                <tr>
+                    <td>16</td>
+                    <td>Создать заказ (несуществующий товар)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td class="json">{
+  "clientName": "Иван Иванов",
+  "clientEmail": "ivan@example.com",
+  "items": [
+    {
+      "productId": 999,
+      "quantity": 1
+    }
+  ]
+}</td>
+                    <td><span class="expected-code code-400">400</span></td>
+                    <td>{"error": "Товар с id 999 не найден"}</td>
+                </tr>
+                <tr>
+                    <td>17</td>
+                    <td>Создать заказ (недостаточно товара)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td class="json">{
+  "clientName": "Иван Иванов",
+  "clientEmail": "ivan@example.com",
+  "items": [
+    {
+      "productId": 1,
+      "quantity": 1000
+    }
+  ]
+}</td>
+                    <td><span class="expected-code code-400">400</span></td>
+                    <td>{"error": "Недостаточно товара с id 1 на складе. Доступно: X, запрошено: 1000"}</td>
+                </tr>
+                <tr>
+                    <td>18</td>
+                    <td>Создать заказ (несколько товаров)</td>
+                    <td><span class="method method-post">POST</span></td>
+                    <td class="url">/api/orders</td>
+                    <td>-</td>
+                    <td class="json">{
+  "clientName": "Петр Петров",
+  "clientEmail": "petr@example.com",
+  "clientPhone": "+79007654321",
+  "items": [
+    {
+      "productId": 2,
+      "quantity": 1
+    },
+    {
+      "productId": 3,
+      "quantity": 2
+    }
+  ]
+}</td>
+                    <td><span class="expected-code code-201">201</span></td>
+                    <td>{"success": true, "orderId": X, "totalAmount": Y, "message": "Заказ успешно создан"}</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div class="note">
+            <strong>Примечания:</strong><br>
+            • Для POST-запросов необходимо добавить Header: <code>Content-Type: application/json</code><br>
+            • Для теста №3 используйте вкладку Params в Postman: Key = "category", Value = "Смартфоны"<br>
+            • Для теста №11 сначала создайте заказ через тест №13, чтобы получить существующий ID<br>
+            • X и Y в ожидаемых результатах - это числовые значения, которые будут возвращены сервером
+        </div>
+    </div>
+</body>
+</html>
+

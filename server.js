@@ -3,6 +3,8 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const sqlite3 = require('sqlite3').verbose();
 const path = require('path');
+const swaggerUi = require('swagger-ui-express');
+const swaggerJsdoc = require('swagger-jsdoc');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -10,6 +12,242 @@ const PORT = process.env.PORT || 3000;
 app.use(cors());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+const swaggerOptions = {
+    definition: {
+        openapi: '3.0.0',
+        info: {
+            title: 'Electronics Store API',
+            version: '1.0.0',
+            description: 'Веб-API для интернет-магазина электроники. Предоставляет функционал для управления товарами, категориями и заказами.',
+            contact: {
+                name: 'API Support'
+            }
+        },
+        servers: [
+            {
+                url: 'https://cvb-363x.onrender.com',
+                description: 'Production server'
+            },
+            {
+                url: `http://localhost:${PORT}`,
+                description: 'Local development server'
+            }
+        ],
+        components: {
+            schemas: {
+                Product: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'integer',
+                            description: 'Уникальный идентификатор товара'
+                        },
+                        name: {
+                            type: 'string',
+                            description: 'Название товара'
+                        },
+                        description: {
+                            type: 'string',
+                            description: 'Описание товара'
+                        },
+                        price: {
+                            type: 'number',
+                            description: 'Цена товара'
+                        },
+                        category: {
+                            type: 'string',
+                            description: 'Категория товара'
+                        },
+                        inStock: {
+                            type: 'integer',
+                            description: 'Количество товара на складе'
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Дата создания записи'
+                        }
+                    }
+                },
+                ProductInput: {
+                    type: 'object',
+                    required: ['name', 'price'],
+                    properties: {
+                        name: {
+                            type: 'string',
+                            description: 'Название товара'
+                        },
+                        description: {
+                            type: 'string',
+                            description: 'Описание товара'
+                        },
+                        price: {
+                            type: 'number',
+                            description: 'Цена товара'
+                        },
+                        category: {
+                            type: 'string',
+                            description: 'Категория товара'
+                        },
+                        inStock: {
+                            type: 'integer',
+                            description: 'Количество товара на складе',
+                            default: 0
+                        }
+                    }
+                },
+                Order: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'integer',
+                            description: 'Уникальный идентификатор заказа'
+                        },
+                        clientName: {
+                            type: 'string',
+                            description: 'Имя клиента'
+                        },
+                        clientEmail: {
+                            type: 'string',
+                            format: 'email',
+                            description: 'Email клиента'
+                        },
+                        clientPhone: {
+                            type: 'string',
+                            description: 'Телефон клиента'
+                        },
+                        totalAmount: {
+                            type: 'number',
+                            description: 'Общая сумма заказа'
+                        },
+                        status: {
+                            type: 'string',
+                            description: 'Статус заказа',
+                            default: 'pending'
+                        },
+                        createdAt: {
+                            type: 'string',
+                            format: 'date-time',
+                            description: 'Дата создания заказа'
+                        },
+                        items: {
+                            type: 'array',
+                            items: {
+                                $ref: '#/components/schemas/OrderItem'
+                            }
+                        }
+                    }
+                },
+                OrderItem: {
+                    type: 'object',
+                    properties: {
+                        id: {
+                            type: 'integer',
+                            description: 'Уникальный идентификатор позиции заказа'
+                        },
+                        orderId: {
+                            type: 'integer',
+                            description: 'ID заказа'
+                        },
+                        productId: {
+                            type: 'integer',
+                            description: 'ID товара'
+                        },
+                        productName: {
+                            type: 'string',
+                            description: 'Название товара'
+                        },
+                        quantity: {
+                            type: 'integer',
+                            description: 'Количество товара'
+                        },
+                        price: {
+                            type: 'number',
+                            description: 'Цена товара'
+                        }
+                    }
+                },
+                OrderInput: {
+                    type: 'object',
+                    required: ['clientName', 'clientEmail', 'items'],
+                    properties: {
+                        clientName: {
+                            type: 'string',
+                            description: 'Имя клиента'
+                        },
+                        clientEmail: {
+                            type: 'string',
+                            format: 'email',
+                            description: 'Email клиента'
+                        },
+                        clientPhone: {
+                            type: 'string',
+                            description: 'Телефон клиента'
+                        },
+                        items: {
+                            type: 'array',
+                            minItems: 1,
+                            items: {
+                                type: 'object',
+                                required: ['productId', 'quantity'],
+                                properties: {
+                                    productId: {
+                                        type: 'integer',
+                                        description: 'ID товара'
+                                    },
+                                    quantity: {
+                                        type: 'integer',
+                                        minimum: 1,
+                                        description: 'Количество товара'
+                                    }
+                                }
+                            }
+                        }
+                    }
+                },
+                Error: {
+                    type: 'object',
+                    properties: {
+                        error: {
+                            type: 'string',
+                            description: 'Сообщение об ошибке'
+                        }
+                    }
+                },
+                Success: {
+                    type: 'object',
+                    properties: {
+                        success: {
+                            type: 'boolean',
+                            description: 'Флаг успешности операции'
+                        },
+                        message: {
+                            type: 'string',
+                            description: 'Сообщение о результате операции'
+                        },
+                        productId: {
+                            type: 'integer',
+                            description: 'ID созданного товара'
+                        },
+                        orderId: {
+                            type: 'integer',
+                            description: 'ID созданного заказа'
+                        },
+                        totalAmount: {
+                            type: 'number',
+                            description: 'Общая сумма заказа'
+                        }
+                    }
+                }
+            }
+        }
+    },
+    apis: ['./server.js']
+};
+
+const swaggerSpec = swaggerJsdoc(swaggerOptions);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
 const dbPath = path.join(__dirname, 'database.db');
 const db = new sqlite3.Database(dbPath);
@@ -64,6 +302,35 @@ db.serialize(() => {
     });
 });
 
+/**
+ * @swagger
+ * /api/products:
+ *   get:
+ *     summary: Получить список всех товаров
+ *     tags: [Товары]
+ *     parameters:
+ *       - in: query
+ *         name: category
+ *         schema:
+ *           type: string
+ *         description: Фильтр по категории товара
+ *         required: false
+ *     responses:
+ *       200:
+ *         description: Список товаров успешно получен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Product'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/api/products', (req, res) => {
     const category = req.query.category;
     let query = 'SELECT * FROM products';
@@ -82,6 +349,39 @@ app.get('/api/products', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/products/{id}:
+ *   get:
+ *     summary: Получить товар по ID
+ *     tags: [Товары]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID товара
+ *     responses:
+ *       200:
+ *         description: Товар успешно найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Product'
+ *       404:
+ *         description: Товар не найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/api/products/:id', (req, res) => {
     const id = req.params.id;
     db.get('SELECT * FROM products WHERE id = ?', [id], (err, row) => {
@@ -95,6 +395,28 @@ app.get('/api/products/:id', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/orders:
+ *   get:
+ *     summary: Получить список всех заказов
+ *     tags: [Заказы]
+ *     responses:
+ *       200:
+ *         description: Список заказов успешно получен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Order'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/api/orders', (req, res) => {
     db.all(`SELECT o.*, 
             GROUP_CONCAT(oi.productId || ':' || oi.quantity || ':' || oi.price) as items
@@ -109,6 +431,39 @@ app.get('/api/orders', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/orders/{id}:
+ *   get:
+ *     summary: Получить заказ по ID
+ *     tags: [Заказы]
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID заказа
+ *     responses:
+ *       200:
+ *         description: Заказ успешно найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Order'
+ *       404:
+ *         description: Заказ не найден
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/api/orders/:id', (req, res) => {
     const id = req.params.id;
     db.get('SELECT * FROM orders WHERE id = ?', [id], (err, order) => {
@@ -128,6 +483,47 @@ app.get('/api/orders/:id', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/orders:
+ *   post:
+ *     summary: Создать новый заказ
+ *     tags: [Заказы]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/OrderInput'
+ *           example:
+ *             clientName: "Иван Иванов"
+ *             clientEmail: "ivan@example.com"
+ *             clientPhone: "+79001234567"
+ *             items:
+ *               - productId: 1
+ *                 quantity: 2
+ *               - productId: 3
+ *                 quantity: 1
+ *     responses:
+ *       201:
+ *         description: Заказ успешно создан
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Неверные входные данные или недостаточно товара на складе
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.post('/api/orders', (req, res) => {
     const { clientName, clientEmail, clientPhone, items } = req.body;
 
@@ -215,6 +611,44 @@ app.post('/api/orders', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/products:
+ *   post:
+ *     summary: Добавить новый товар
+ *     tags: [Товары]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/ProductInput'
+ *           example:
+ *             name: "Клавиатура Logitech"
+ *             description: "Механическая клавиатура"
+ *             price: 3500
+ *             category: "Аксессуары"
+ *             inStock: 20
+ *     responses:
+ *       201:
+ *         description: Товар успешно добавлен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Success'
+ *       400:
+ *         description: Неверные входные данные
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.post('/api/products', (req, res) => {
     const { name, description, price, category, inStock } = req.body;
 
@@ -236,6 +670,29 @@ app.post('/api/products', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /api/categories:
+ *   get:
+ *     summary: Получить список всех категорий товаров
+ *     tags: [Категории]
+ *     responses:
+ *       200:
+ *         description: Список категорий успешно получен
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *             example: ["Смартфоны", "Ноутбуки", "Аксессуары", "Планшеты"]
+ *       500:
+ *         description: Ошибка сервера
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ */
 app.get('/api/categories', (req, res) => {
     db.all('SELECT DISTINCT category FROM products WHERE category IS NOT NULL', (err, rows) => {
         if (err) {
@@ -245,6 +702,29 @@ app.get('/api/categories', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /:
+ *   get:
+ *     summary: Получить информацию об API
+ *     tags: [Информация]
+ *     responses:
+ *       200:
+ *         description: Информация об API
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 service:
+ *                   type: string
+ *                 version:
+ *                   type: string
+ *                 status:
+ *                   type: string
+ *                 endpoints:
+ *                   type: object
+ */
 app.get('/', (req, res) => {
     res.json({
         service: 'Electronics Store API',
@@ -264,6 +744,27 @@ app.get('/', (req, res) => {
     });
 });
 
+/**
+ * @swagger
+ * /health:
+ *   get:
+ *     summary: Проверка работоспособности сервиса
+ *     tags: [Информация]
+ *     responses:
+ *       200:
+ *         description: Сервис работает
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 status:
+ *                   type: string
+ *                   example: "ok"
+ *                 service:
+ *                   type: string
+ *                   example: "electronics-store-api"
+ */
 app.get('/health', (req, res) => {
     res.json({ status: 'ok', service: 'electronics-store-api' });
 });
@@ -278,5 +779,6 @@ app.listen(PORT, () => {
     console.log(`  GET  /api/categories - получить все категории`);
     console.log(`  POST /api/products - добавить товар`);
     console.log(`  POST /api/orders - создать заказ`);
+    console.log(`  GET  /api-docs - Swagger документация`);
 });
 
